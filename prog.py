@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """ Flynamic image checker """
-__author__ = 'picka'
+__author__ = "picka"
 
 import argparse
 import os
@@ -10,9 +10,10 @@ from PIL import Image
 def main():
 
 	# set up arguments
-	parser = argparse.ArgumentParser(description='Flynamic Image Checker')
-	parser.add_argument('-c', '--converge', help='Converge ID', required=False)
-	parser.add_argument('-p', '--publisher', help='Publisher Name', required=False)
+	parser = argparse.ArgumentParser(description="Flynamic Image Checker")
+	parser.add_argument("-c", "--converge", help="Converge ID", required=False)
+	parser.add_argument("-p", "--publisher", help="Publisher Name", required=False)
+	parser.add_argument("-d", "--destination", help="Destination Directory", required=True)
 	args = parser.parse_args()
 
 	# define spec
@@ -20,29 +21,40 @@ def main():
 	  "logowidth": 300,
 	  "logosize": 30,
 	  "lifewidth": 960,
+	  "lifeheight": 960,
 	  "lifesize": 100
 	}
 
 	# get filenames & set up dir
-	basedir = "img/"
+	basedir = args.destination + "/"
 	images = os.listdir(basedir)
 
+	print ("\nChecking specs in " + basedir + " ...\n")
+
 	# loop through files, spec check & output
-	for x in images:
-		filesize = round(os.stat(basedir + x).st_size / 1000)
-		filedimensions = Image.open(basedir + x)
+	for image in images:
+		filesize = round(os.stat(basedir + image).st_size / 1000)
+		filedimensions = Image.open(basedir + image)
 
 		# check bytes
 		if filesize > spec["lifesize"]:
-			print("OUT OF SPEC! > " + x + " >", str(filesize) + "kb")
+			print("Wrong filesize > " + image + " >", str(filesize) + "kb")
 		else:
-			print("no error > " + x + " >", str(filesize) + "kb")
+			print("All good > " + image + " >", str(filesize) + "kb")
 
 		# check widths
-		if filedimensions.width > spec["lifewidth"]:
-			print("OUT OF SPEC! > " + x + " >", str(filedimensions.width) + "px")
+		if filedimensions.width != spec["lifewidth"]:
+			print("Wrong width > " + image + " >", str(filedimensions.width) + "px")
 		else:
-			print("no error > " + x + " >", str(filedimensions.width) + "px")
+			print("no error > " + image + " >", str(filedimensions.width) + "px")
+
+		# check heights
+		if filedimensions.height != spec["lifeheight"]:
+			print("Wrong height > " + image + " >", str(filedimensions.width) + "px")
+		else:
+			print("no error > " + image + " >", str(filedimensions.height) + "px")
+
+	print("")
 
 main()
 
