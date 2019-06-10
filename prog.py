@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3
 
 """ Flynamic image checker """
-__author__ = "picka"
+__author__ = "teo"
 
 import argparse
 import os
@@ -12,22 +12,12 @@ def main():
 
 	print("\nRunning spec validation...\n")
 
-	# set up arguments
+	# set up command line arguments
 	parser = argparse.ArgumentParser(description="Flynamic Image Checker")
-	parser.add_argument("-c", "--converge", help="Converge ID", required=False)
-	parser.add_argument("-p", "--publisher", help="Publisher Name", required=False)
 	parser.add_argument("-d", "--destination", help="Destination Directory", required=True)
 	args = parser.parse_args()
 
 	# define spec
-	# spec =	{
-	#   "logowidth": 300,
-	#   "logosize": 30,
-	#   "lifewidth": 960,
-	#   "lifeheight": 960,
-	#   "lifesize": 100
-	# }
-
 	spec = {
 		"2x1": {
 			"width": 480,
@@ -46,11 +36,11 @@ def main():
 		}
 	}
 
-	# read dirs in campaign
+	# read dirs @ campaign root
 	dirs = os.listdir(args.destination)
 	sets = []
 
-	# structure
+	# structure tree
 	def structure():
 
 		# filter out sets
@@ -80,13 +70,10 @@ def main():
 					except Exception as e:
 						print(f"{e}, skipping...\n")
 
-	# validation
+	# run validation
 	def validate(set, ratio, image, path):
 
-		print(f"Image: {image}")
-		print(f"Ratio: {ratio}")
-		print(f"Set: {set}")
-		print(f"Path: {path}")
+		print(f"Image: {image}\nRatio: {ratio}\nSet: {set}\nPath: {path}")
 
 		filesize = round(os.stat(path + image).st_size / 1000)
 		filedimensions = Image.open(path + image)
@@ -109,7 +96,6 @@ def main():
 		print("")
 
 	structure()
-
 	print("Done!\n")
 
 main()
