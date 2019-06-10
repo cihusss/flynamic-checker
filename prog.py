@@ -1,13 +1,16 @@
-#!/usr/bin/python
+#!/usr/local/bin/python3
 
 """ Flynamic image checker """
 __author__ = "picka"
 
 import argparse
 import os
+import re
 from PIL import Image
 
 def main():
+
+	print("\nRunning spec validation...\n")
 
 	# set up arguments
 	parser = argparse.ArgumentParser(description="Flynamic Image Checker")
@@ -17,50 +20,96 @@ def main():
 	args = parser.parse_args()
 
 	# define spec
-	spec =	{
-	  "logowidth": 300,
-	  "logosize": 30,
-	  "lifewidth": 960,
-	  "lifeheight": 960,
-	  "lifesize": 100
+	# spec =	{
+	#   "logowidth": 300,
+	#   "logosize": 30,
+	#   "lifewidth": 960,
+	#   "lifeheight": 960,
+	#   "lifesize": 100
+	# }
+
+	spec = {
+		"2x1": {
+			"width": 480,
+			"height": 480,
+			"filesize": 100
+		},
+		"4x1": {
+			"width": 960,
+			"height": 480,
+			"filesize": 100
+		},
+		"10x1": {
+			"width": 960,
+			"height": 240,
+			"filesize": 100
+		}
 	}
 
-	# get filenames & set up dir
-	basedir = args.destination + "/"
-	images = os.listdir(basedir)
+	# read dirs in campaign
+	dirs = os.listdir(args.destination)
+	sets = []
 
-	print ("\nChecking specs in " + basedir + " ...\n")
+	# structure
+	def structure():
 
-	# loop through files, spec check & output
-	for image in images:
-		filesize = round(os.stat(basedir + image).st_size / 1000)
-		filedimensions = Image.open(basedir + image)
+		# filter out sets
+		for dir in dirs:
+			
+			if dir.startswith("set"):
+				sets.append(dir)
+
+		# filter out images
+		for set in sets:
+			
+			number = -1
+			paths = []
+			ratios = os.listdir(f"{args.destination}{set}/ratios/")
+
+			for ratio in ratios:
+				paths.append(f"{args.destination}{set}/ratios/{ratio}/img/")
+			
+			for path in paths:
+				number += 1
+				ratio = ratios[number]
+				images = (os.listdir(path))
+				for image in images:
+					try:
+						image != ".DS_Store"
+						validate(set, ratio, image, path)
+					except Exception as e:
+						print(f"{e}, skipping...\n")
+
+	# validation
+	def validate(set, ratio, image, path):
+
+		print(f"Image: {image}")
+		print(f"Ratio: {ratio}")
+		print(f"Set: {set}")
+		print(f"Path: {path}")
+
+		filesize = round(os.stat(path + image).st_size / 1000)
+		filedimensions = Image.open(path + image)
 
 		# check bytes
-		if filesize > spec["lifesize"]:
-			print("Wrong filesize > " + image + " >", str(filesize) + "kb")
+		if filesize > spec.get(ratio).get("filesize"):
+			print(f"Filesize FAIL: {filesize}kb")
 		else:
-			print("All good > " + image + " >", str(filesize) + "kb")
-
-		# check widths
-		if filedimensions.width != spec["lifewidth"]:
-			print("Wrong width > " + image + " >", str(filedimensions.width) + "px")
+			print(f"Filesize OK: {filesize}kb")
+		#check widths
+		if filedimensions.width != spec.get(ratio).get("width"):
+			print(f"Width FAIL: {filedimensions.width}px")
 		else:
-			print("no error > " + image + " >", str(filedimensions.width) + "px")
-
-		# check heights
-		if filedimensions.height != spec["lifeheight"]:
-			print("Wrong height > " + image + " >", str(filedimensions.width) + "px")
+			print(f"Width OK: {filedimensions.width}px")
+		#check heights
+		if filedimensions.height != spec.get(ratio).get("height"):
+			print(f"Height FAIL: {filedimensions.height}px")
 		else:
-			print("no error > " + image + " >", str(filedimensions.height) + "px")
+			print(f"Height OK: {filedimensions.height}px")
+		print("")
 
-	print("")
+	structure()
+
+	print("Done!\n")
 
 main()
-
-# print("Image stats:", images, file_size("img/thumb-ad.jpg"))
-# print(f"File size in bytes of [{images}] ", file_size("img/thumb-ad.jpg"))
-
-## argument values ##
-# print ("Converge ID: %s" % args.converge )
-# print ("Publisher: %s" % args.publisher )
