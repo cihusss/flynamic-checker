@@ -16,6 +16,8 @@ def main():
 	parser = argparse.ArgumentParser(description="Flynamic Image Checker")
 	parser.add_argument("-d", "--destination", help="Destination Directory", required=True)
 	args = parser.parse_args()
+	if not args.destination.endswith("/"):
+		args.destination = f"{args.destination}/"
 
 	# define spec
 	spec = {
