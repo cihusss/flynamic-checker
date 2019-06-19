@@ -33,12 +33,18 @@ def main():
 			"width": 960,
 			"height": 240,
 			"filesize": 100
+		},
+		"shared": {
+			"width": 300,
+			"height": 300,
+			"filesize": 40
 		}
 	}
 
 	# read dirs @ campaign root
 	dirs = os.listdir(args.destination)
 	sets = []
+	sharedpaths = []
 
 	# structure tree
 	def structure():
@@ -54,14 +60,19 @@ def main():
 			
 			number = -1
 			paths = []
+			paths.append(f"{args.destination}{set}/shared/img/")
+			sharedpaths.append(f"{args.destination}{set}/shared/img/")
 			ratios = os.listdir(f"{args.destination}{set}/ratios/")
 
 			for ratio in ratios:
 				paths.append(f"{args.destination}{set}/ratios/{ratio}/img/")
-			
+
 			for path in paths:
-				number += 1
-				ratio = ratios[number]
+				if "shared" in path:
+					ratio = "shared"
+				else:
+					number += 1
+					ratio = ratios[number]
 				images = (os.listdir(path))
 				for image in images:
 					try:
