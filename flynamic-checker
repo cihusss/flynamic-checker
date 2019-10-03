@@ -56,6 +56,9 @@ def main():
 			
 			if dir.startswith("set"):
 				sets.append(dir)
+			else:
+				print("Bad folder structure, exiting!\n")
+				exit()
 
 		# filter out images
 		for set in sets:
